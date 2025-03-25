@@ -1,27 +1,54 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './auth.css';
+import { supabase } from '../utils/supabaseClient.js';
 
 const LoginPage = () => {
+    const navigate = useNavigate()
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setLoading(true)
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                navigate('/'); 
+            }
+            setLoading(false)
+
+        };
+        checkUser();
+    }, [navigate]);
+
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        rememberMe: false
     });
     
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'checkbox' ? checked : value
-        });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
     
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
-        // Handle login logic here
-        console.log('Login form submitted:', formData);
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: formData.email,
+                password: formData.password,
+            });
+
+            if (error) throw error;
+
+            console.log('Login form submitted:', formData);
+            navigate("/");
+        } catch (err) {
+            console.error("Login error:", err.message);
+            alert("Login failed! Please check your credentials.");
+        }
+        
     };
+    
+    if (loading) return <p>Loading....</p>
     
     return (
         <div className="auth-page">
@@ -30,30 +57,6 @@ const LoginPage = () => {
                     <div className="auth-header">
                         <h1>Welcome Back</h1>
                         <p>Log in to access your Rentora account</p>
-                    </div>
-                    
-                    <div className="social-auth">
-                        <button className="social-btn google-btn">
-                            <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                                <g transform="matrix(1, 0, 0, 1, 0, 0)">
-                                    <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1Z" fill="#EA4335"></path>
-                                </g>
-                            </svg>
-                            <span>Sign in with Google</span>
-                        </button>
-                        
-                        <button className="social-btn facebook-btn">
-                            <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                                <g transform="matrix(1, 0, 0, 1, 0, 0)">
-                                    <path d="M20.9,2H3.1C2.5,2,2,2.5,2,3.1v17.8C2,21.5,2.5,22,3.1,22h9.6v-7.7h-2.6v-3h2.6V9.2c0-2.6,1.6-4,3.9-4c1.1,0,2.1,0.1,2.3,0.1v2.7h-1.6c-1.3,0-1.5,0.6-1.5,1.5v1.9h3l-0.4,3h-2.6V22h5.1c0.6,0,1.1-0.5,1.1-1.1V3.1C22,2.5,21.5,2,20.9,2z" fill="#1877F2"></path>
-                                </g>
-                            </svg>
-                            <span>Sign in with Facebook</span>
-                        </button>
-                    </div>
-                    
-                    <div className="divider">
-                        <span>or</span>
                     </div>
                     
                     <form onSubmit={handleSubmit} className="auth-form">
@@ -88,23 +91,9 @@ const LoginPage = () => {
                                     value={formData.password} 
                                     onChange={handleChange} 
                                     required 
-                                    placeholder="Min. 8 characters"
+                                    placeholder="Min. 6 characters"
                                 />
                             </div>
-                        </div>
-                        
-                        <div className="form-footer">
-                            <div className="remember-me">
-                                <input 
-                                    type="checkbox" 
-                                    id="rememberMe" 
-                                    name="rememberMe" 
-                                    checked={formData.rememberMe} 
-                                    onChange={handleChange} 
-                                />
-                                <label htmlFor="rememberMe">Remember me</label>
-                            </div>
-                            <a href="/forgot-password" className="forgot-password">Forgot password?</a>
                         </div>
                         
                         <button type="submit" className="submit-btn">

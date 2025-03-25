@@ -5,9 +5,11 @@ import HomePage from './pages/HomePage';
 import ExplorePage from './pages/ExplorePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import { AuthProvider } from './utils/AuthContext';
 
 const App = () => {
     return (
+        <AuthProvider>
         <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
@@ -30,6 +32,7 @@ const App = () => {
                 </Layout>
             } />
         </Routes>
+        </AuthProvider>
     );
 };
 

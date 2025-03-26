@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './listingSection.css';
+import axios from 'axios';
+import { useAuth } from '../../utils/AuthContext';
+
+const API = import.meta.env.VITE_BACKEND_URL;
 
 const ListingSection = () => {
+    const { user } = useAuth();
     const [showAddForm, setShowAddForm] = useState(false);
     const [colleges, setColleges] = useState([]);
     const [formData, setFormData] = useState({
@@ -13,26 +18,25 @@ const ListingSection = () => {
         district: '',
         contact: '',
         address: '',
+         rent: '',
         roomTypes: [{ room_type_name: '', rent: '', available_units: 1, is_available: true }]
     });
-    
-    // Simulate fetching colleges from your API
+
     useEffect(() => {
-        // Replace with actual API call
         const fetchColleges = async () => {
-            // Mockup data
-            const mockColleges = [
-                { college_id: 1, college_name: 'University of Technology' },
-                { college_id: 2, college_name: 'City College' },
-                { college_id: 3, college_name: 'Medical University' },
-                { college_id: 4, college_name: 'Engineering Institute' }
-            ];
-            setColleges(mockColleges);
+            try {
+                const response = await axios.get(`${API}/college`);
+                setColleges(response.data);
+            } catch (error) {
+                console.error('Error fetching colleges:', error);
+            }
         };
         
         fetchColleges();
     }, []);
+
     
+
     const toggleAddForm = () => {
         setShowAddForm(!showAddForm);
     };
@@ -75,24 +79,85 @@ const ListingSection = () => {
         });
     };
     
-    const handleSubmit = (e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted with data:', formData);
-        // Here you would send the data to your backend API
-        alert('Property submitted successfully!');
-        setShowAddForm(false);
-        setFormData({
-            name: '',
-            type: '',
-            description: '',
-            college_id: '',
-            distance_km: '',
-            district: '',
-            contact: '',
-            address: '',
-            roomTypes: [{ room_type_name: '', rent: '', available_units: 1, is_available: true }]
-        });
+        
+        // Validate user is logged in
+        if (!user) {
+            alert('Please log in to submit a property');
+            return;
+        }
+
+        try {
+            // Prepare property data
+            const propertyData = {
+                name: formData.name,
+                type: formData.type,
+                owner_id: user.id, // Use Supabase user ID
+                description: formData.description,
+                college_id: formData.college_id,
+                distance_km: parseFloat(formData.distance_km),
+                district: formData.district,
+                contact: formData.contact,
+                address: formData.address,
+                rent: formData.type !== 'hostel' ? parseFloat(formData.rent) : null
+            };
+
+            // Submit property
+            const propertyResponse = await axios.post(`${API}/accomodations`, propertyData);
+            const propertyId = propertyResponse.data.accommodation.accommodation_id;
+
+            // If it's a hostel, add room types
+            if (formData.type === 'hostel') {
+                const roomPromises = formData.roomTypes.map(roomType => 
+                    axios.post(`${API}/rooms`, {
+                        accommodation_id: propertyId,
+                        room_type_name: roomType.room_type_name,
+                        rent: parseFloat(roomType.rent),
+                        available_units: parseInt(roomType.available_units),
+                        is_available: roomType.is_available
+                    })
+                );
+
+                await Promise.all(roomPromises);
+            }
+
+            // Success handling
+            alert('Property submitted successfully!');
+            setShowAddForm(false);
+            
+            // Reset form
+            setFormData({
+                name: '',
+                type: '',
+                description: '',
+                college_id: '',
+                distance_km: '',
+                district: '',
+                contact: '',
+                address: '',
+                rent: '',
+                roomTypes: [{ room_type_name: '', rent: '', available_units: 1, is_available: true }]
+            });
+        } catch (error) {
+            console.error('Error submitting property:', error);
+            
+            // More detailed error handling
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                alert(error.response.data.error || 'Failed to submit property');
+            } else if (error.request) {
+                // The request was made but no response was received
+                alert('No response received from server');
+            } else {
+                // Something happened in setting up the request
+                alert('Error submitting property');
+            }
+        }
     };
+
+    const isHostel = formData.type === 'hostel';
     
     return (
         <section className="listing-section" id="listing">
@@ -164,11 +229,95 @@ const ListingSection = () => {
                                             <option value="">Select Type</option>
                                             <option value="hostel">Hostel</option>
                                             <option value="pg">PG</option>
-                                            <option value="apartment">Apartment</option>
-                                            <option value="flat">Flat</option>
-                                            <option value="room">Single Room</option>
+                                            <option value="rented_home">Rented Home</option>
                                         </select>
                                     </div>
+
+                                    {!isHostel && (
+                                <div className="form-group">
+                                    <label htmlFor="rent">Monthly Rent (₹)</label>
+                                    <input 
+                                        type="number" 
+                                        id="rent" 
+                                        name="rent" 
+                                        value={formData.rent}
+                                        onChange={handleChange}
+                                        min="0" 
+                                        placeholder="5000" 
+                                        required={!isHostel}
+                                    />
+                                </div>
+                            )}
+
+                                                    {/* Room types section - only show for hostels */}
+                        {isHostel && (
+                            <div className="room-types-section">
+                                <div className="room-types-header">
+                                    <h4>Room Types</h4>
+                                    <button type="button" className="add-room-btn" onClick={addRoomType}>
+                                        + Add Room Type
+                                    </button>
+                                </div>
+                                
+                                {formData.roomTypes.map((roomType, index) => (
+                                    <div key={index} className="room-type-container">
+                                        <h5>Room Type {index + 1}</h5>
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label htmlFor={`roomType-${index}`}>Room Type Name</label>
+                                                <input 
+                                                    type="text" 
+                                                    id={`roomType-${index}`} 
+                                                    name="room_type_name" 
+                                                    value={roomType.room_type_name}
+                                                    onChange={(e) => handleRoomTypeChange(index, e)}
+                                                    placeholder="e.g. Single Room, Double Sharing" 
+                                                    required 
+                                                />
+                                            </div>
+                                            
+                                            <div className="form-group">
+                                                <label htmlFor={`rent-${index}`}>Monthly Rent (₹)</label>
+                                                <input 
+                                                    type="number" 
+                                                    id={`rent-${index}`} 
+                                                    name="rent" 
+                                                    value={roomType.rent}
+                                                    onChange={(e) => handleRoomTypeChange(index, e)}
+                                                    min="0" 
+                                                    placeholder="5000" 
+                                                    required 
+                                                />
+                                            </div>
+                                            
+                                            <div className="form-group">
+                                                <label htmlFor={`units-${index}`}>Available Units</label>
+                                                <input 
+                                                    type="number" 
+                                                    id={`units-${index}`} 
+                                                    name="available_units" 
+                                                    value={roomType.available_units}
+                                                    onChange={(e) => handleRoomTypeChange(index, e)}
+                                                    min="1" 
+                                                    placeholder="1" 
+                                                    required 
+                                                />
+                                            </div>
+                                            
+                                            {index > 0 && (
+                                                <button 
+                                                    type="button" 
+                                                    className="remove-room-btn"
+                                                    onClick={() => removeRoomType(index)}
+                                                >
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                                     
                                     <div className="form-group">
                                         <label htmlFor="college_id">Nearest College</label>
@@ -258,70 +407,7 @@ const ListingSection = () => {
                                     ></textarea>
                                 </div>
                                 
-                                <div className="room-types-section">
-                                    <div className="room-types-header">
-                                        <h4>Room Types</h4>
-                                        <button type="button" className="add-room-btn" onClick={addRoomType}>+ Add Room Type</button>
-                                    </div>
-                                    
-                                    {formData.roomTypes.map((roomType, index) => (
-                                        <div key={index} className="room-type-container">
-                                            <h5>Room Type {index + 1}</h5>
-                                            <div className="form-row">
-                                                <div className="form-group">
-                                                    <label htmlFor={`roomType-${index}`}>Room Type Name</label>
-                                                    <input 
-                                                        type="text" 
-                                                        id={`roomType-${index}`} 
-                                                        name="room_type_name" 
-                                                        value={roomType.room_type_name}
-                                                        onChange={(e) => handleRoomTypeChange(index, e)}
-                                                        placeholder="e.g. Single Room, Double Sharing" 
-                                                        required 
-                                                    />
-                                                </div>
-                                                
-                                                <div className="form-group">
-                                                    <label htmlFor={`rent-${index}`}>Monthly Rent (₹)</label>
-                                                    <input 
-                                                        type="number" 
-                                                        id={`rent-${index}`} 
-                                                        name="rent" 
-                                                        value={roomType.rent}
-                                                        onChange={(e) => handleRoomTypeChange(index, e)}
-                                                        min="0" 
-                                                        placeholder="5000" 
-                                                        required 
-                                                    />
-                                                </div>
-                                                
-                                                <div className="form-group">
-                                                    <label htmlFor={`units-${index}`}>Available Units</label>
-                                                    <input 
-                                                        type="number" 
-                                                        id={`units-${index}`} 
-                                                        name="available_units" 
-                                                        value={roomType.available_units}
-                                                        onChange={(e) => handleRoomTypeChange(index, e)}
-                                                        min="1" 
-                                                        placeholder="1" 
-                                                        required 
-                                                    />
-                                                </div>
-                                                
-                                                {index > 0 && (
-                                                    <button 
-                                                        type="button" 
-                                                        className="remove-room-btn"
-                                                        onClick={() => removeRoomType(index)}
-                                                    >
-                                                        Remove
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+
                                 
                                 <div className="form-group">
                                     <label htmlFor="photos">Upload Photos</label>

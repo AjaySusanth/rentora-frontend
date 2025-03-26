@@ -48,6 +48,7 @@ const SignupPage = () => {
             await axios.post(`${API}/auth/signup`, {
                 name: formData.fullName,
                 email: formData.email,
+                supabase_id:data.user.id
             });
     
     

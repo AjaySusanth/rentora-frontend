@@ -1,0 +1,252 @@
+.explore-page {
+    padding: 60px 20px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.explore-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.explore-header h1 {
+    font-size: 2.5rem;
+    color: #2d3748;
+    margin-bottom: 15px;
+}
+
+.explore-header p {
+    color: #718096;
+    font-size: 1.1rem;
+}
+
+.explore-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.search-and-filters {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.search-bar {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px 0 0 8px;
+    font-size: 1rem;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.search-btn {
+    background: linear-gradient(45deg, #007bff, #00c6ff);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.search-btn:hover {
+    opacity: 0.9;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 180px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.price-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.price-range input {
+    width: calc(50% - 15px);
+}
+
+.price-range span {
+    color: #718096;
+}
+
+.reset-filters-btn {
+    background-color: transparent;
+    color: #007bff;
+    border: 1px solid #007bff;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+    margin-top: 20px;
+}
+
+.reset-filters-btn:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.results-info {
+    margin-bottom: 20px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.accommodations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.accommodation-card {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.accommodation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.accommodation-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.accommodation-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+
+.accommodation-card:hover .accommodation-image img {
+    transform: scale(1.05);
+}
+
+.accommodation-type {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background-color: rgba(0, 123, 255, 0.9);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.accommodation-info {
+    padding: 20px;
+}
+
+.accommodation-info h3 {
+    margin: 0 0 10px 0;
+    color: #2d3748;
+    font-size: 1.25rem;
+}
+
+.college-name {
+    color: #4a5568;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.location {
+    color: #718096;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+}
+
+.price {
+    color: #2d3748;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.availability-tag {
+    display: inline-block;
+    background-color: #ebf8ff;
+    color: #3182ce;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px 0;
+    color: #718096;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 50px 0;
+    color: #718096;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .price-range {
+        flex-direction: row;
+    }
+}

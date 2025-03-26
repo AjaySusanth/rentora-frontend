@@ -34,12 +34,14 @@ const ExplorePage = () => {
                 const [accommodationsRes, districtsRes, collegesRes] = await Promise.all([
                     axios.get(`${API}/accomodations`),
                     axios.get(`${API}/accomodations/districts`),
-                    axios.get(`${API}/college`)
+                    axios.get(`${API}/college`),
                 ]);
+
+            
 
                 setAccommodations(accommodationsRes.data);
                 setFilteredAccommodations(accommodationsRes.data);
-                setDistricts(districtsRes.data.map(d => d.district))
+                setDistricts(districtsRes.data)
                 setColleges(collegesRes.data);
                 setLoading(false);
             } catch (error) {
@@ -92,6 +94,8 @@ const ExplorePage = () => {
         });
     };
 
+   // console.log(filters)
+
     const handleSearch = (e) => {
         e.preventDefault();
         applyFilters();
@@ -106,7 +110,7 @@ const ExplorePage = () => {
             maxDistance: '',
         });
     };
-
+    console.log(accommodations)
     return (
         <div className="explore-page">
         <div className="explore-header">
@@ -146,7 +150,7 @@ const ExplorePage = () => {
                             <option value="">All Types</option>
                             <option value="hostel">Hostel</option>
                             <option value="pg">PG</option>
-                            <option value="rented_home">Rented Home</option>
+                            <option value="rental">Rented Home</option>
                         </select>
                     </div>
 
@@ -177,13 +181,13 @@ const ExplorePage = () => {
                     <div className="accommodations-grid">
                         {filteredAccommodations.length > 0 ? (
                             filteredAccommodations.map(accommodation => (
-                                <Link to={`/details/${accommodation.accommodation_id}`} key={accommodation.accommodation_id} className="accommodation-card">
+                                <Link to={`/details/${accommodation.accommodation_id}`} key={`acc-${accommodation.accommodation_id}`} className="accommodation-card">
                                     <div className="accommodation-image">
                                         <img 
                                             src={accommodationImages[accommodation.type] || accommodationImages.default} 
                                             alt={accommodation.name} 
                                         />
-                                        <div className="accommodation-type">{accommodation.type.toUpperCase()}</div>
+                                        <div className="accommodation-type">{accommodation.type}</div>
                                     </div>
                                     <div className="accommodation-info">
                                         <h3>{accommodation.name}</h3>

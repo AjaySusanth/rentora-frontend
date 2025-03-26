@@ -229,7 +229,7 @@ const ListingSection = () => {
                                             <option value="">Select Type</option>
                                             <option value="hostel">Hostel</option>
                                             <option value="pg">PG</option>
-                                            <option value="rented_home">Rented Home</option>
+                                            <option value="rental">Rented Home</option>
                                         </select>
                                     </div>
 

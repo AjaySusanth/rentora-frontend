@@ -7,9 +7,9 @@ const API = import.meta.env.VITE_BACKEND_URL;
 
 const ExplorePage = () => {
     const accommodationImages = {
-        hostel: '/images/hostel.jpg',
-        pg: '/images/pg.jpg',
-        rented_home: '/images/rented_home.jpg',
+        hostel: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+        pg: 'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+        rented_home: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
         default: '/images/default.jpg'
     };
     
